@@ -1,62 +1,66 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'task.dart';
+import 'package:http/http.dart' as http;
+
+
 
 void main() {
-
-  var tasks = ['do that', 'do this'];
-  bool _status = false;
-  void _statusChange(bool value) => _status = value;
-
   runApp(MaterialApp(
-      home: Scaffold(
-          appBar: AppBar(
-            title: Text('My first app'),
-            backgroundColor: Colors.green,
-          ),
-          body: getTasks()
-      )
+      home: HomePage()
   ));
 }
-//  runApp(MaterialApp(
-//      home: Scaffold(
-//        appBar: AppBar(
-//          title: Text('My first app'),
-//          backgroundColor: Colors.green,
-//        ),
-//        body: Container(
-//          child: Center(
-//            child: Column(
-//              children: <Widget>[
-//                Row(
-//                  children: <Widget>[
-//                    Checkbox(value: _status, onChanged: _statusChange),
-//                    Text('task')
-//                  ],
-//                )
-//              ],
-//            ),
-//          ),
-//        )
-//      )
-//  ));
-//}
 
-Widget getTasks() {
-  List<String> list = ['nice', 'wow'];
 
-  String tasksJson = '''
-  [{"title": "Now this", "status": false, "description": "", "id": 2}]
-  ''';
+class HomePage extends StatefulWidget {
+  @override
+  HomePageState createState() => new HomePageState();
+}
 
-  var parsedTasks = json.decode(tasksJson);
-  return Column(
-    children: <Widget>[
-      for (var task in parsedTasks) Row(
-        children: <Widget>[
-          Checkbox(value: task['status']),
-          Text(task['title'])
-        ]
-      )
-    ],
-  );
+class HomePageState extends State<HomePage> {
+  TaskList tasks;
+
+  Future<String> fetchTasks() async {
+    String apiUrl = 'https://todo-rest-ms.herokuapp.com/todo/api/v1.0/tasks';
+    var response = await http.get(apiUrl);
+    print("Response");
+    this.setState((){
+      if (response.statusCode == 200) {
+        var parsedJson = json.decode(response.body);
+        tasks = TaskList.fromJson(parsedJson);
+      }
+      else {
+        throw Exception('Non 200 response');
+      }
+    });
+    return "SUCCESS";
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    this.fetchTasks();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return  Scaffold(
+        appBar: AppBar(
+          title: Text('Tasks'),
+          backgroundColor: Colors.green,
+        ),
+        body: Column(
+            children: <Widget>[
+              for (var t in tasks.tasks) Row(
+                children: <Widget>[
+                  Checkbox(value: t.status),
+                  Text(t.title)
+                ],
+              )
+            ]
+        )
+    );
+  }
+
 }
