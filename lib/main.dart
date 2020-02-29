@@ -52,14 +52,28 @@ class HomePageState extends State<HomePage> {
         ),
         body: Column(
             children: <Widget>[
-              for (var t in tasks.tasks) Row(
+              if (tasks != null) for (var t in tasks.tasks) Row(
                 children: <Widget>[
-                  Checkbox(value: t.status),
+                  Checkbox(value: t.status,
+                  onChanged: (bool val){
+                    setState(() {
+                      t.status = val;
+                    });
+                  }
+                  ),
                   Text(t.title)
                 ],
               )
             ]
-        )
+        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          for (var t in tasks.tasks)
+            print(t.status);
+        },
+        child: Icon(Icons.print),
+        backgroundColor: Colors.red,
+      ),
     );
   }
 
