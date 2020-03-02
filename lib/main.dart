@@ -19,9 +19,10 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   TaskList tasks;
+  String apiUrl = 'https://todo-rest-ms.herokuapp.com/todo/api/v1.0/tasks';
 
   Future<String> fetchTasks() async {
-    String apiUrl = 'https://todo-rest-ms.herokuapp.com/todo/api/v1.0/tasks';
+
     var response = await http.get(apiUrl);
     print("Response");
     this.setState((){
@@ -36,6 +37,16 @@ class HomePageState extends State<HomePage> {
     return "SUCCESS";
   }
 
+  void updateTask(int id, String json) async {
+    print(json);
+    var response = await http.put(
+        apiUrl + '/' + id.toString(),
+        headers: {"Content-type" : "application/json"},
+        body: json
+    );
+    print(response.body);
+  }
+
 
   @override
   void initState() {
@@ -48,7 +59,7 @@ class HomePageState extends State<HomePage> {
     return  Scaffold(
         appBar: AppBar(
           title: Text('Tasks'),
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.red,
         ),
         body: Column(
             children: <Widget>[
@@ -59,6 +70,7 @@ class HomePageState extends State<HomePage> {
                     setState(() {
                       t.status = val;
                     });
+                    updateTask(t.id, jsonEncode(t));
                   }
                   ),
                   Text(t.title)
