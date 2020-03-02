@@ -47,6 +47,25 @@ class HomePageState extends State<HomePage> {
     print(response.body);
   }
 
+  Future<void> addTask(Map task) async {
+//    print(task.toString());
+//    print(jsonEncode(task));
+    var response = await http.post(
+      apiUrl,
+      headers: {"Content-type" : "application/json"},
+      body: jsonEncode(task)
+    );
+    this.setState((){
+      if (response.statusCode == 200) {
+        var parsedJson = json.decode(response.body);
+        tasks = TaskList.fromJson(parsedJson);
+      }
+      else {
+        throw Exception('Non 200 response');
+      }
+    });
+  }
+
 
   @override
   void initState() {
@@ -80,12 +99,56 @@ class HomePageState extends State<HomePage> {
         ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          for (var t in tasks.tasks)
-            print(t.status);
+          showNewTaskDialog(context).then((onValue) {
+            if (onValue != null) {
+              addTask(onValue);
+            }
+          });
         },
         child: Icon(Icons.print),
         backgroundColor: Colors.red,
       ),
+    );
+  }
+
+  Future<Map> showNewTaskDialog(BuildContext context) {
+    TextEditingController newTaskTitle = TextEditingController();
+    TextEditingController newTaskDesc = TextEditingController();
+    return showDialog(context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Column(
+              children: <Widget>[
+                TextField(
+                  controller: newTaskTitle,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Task',
+                  ),
+                ),
+                TextField(
+                  controller: newTaskDesc,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Description',
+                  ),
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Add'),
+                onPressed: () {
+                  if (newTaskTitle.text.toString().isEmpty)
+                    Navigator.of(context).pop();
+                  Map task = {'title': newTaskTitle.text.toString(), 'description': newTaskDesc.text.toString()};
+                  Navigator.of(context).pop(task);
+                },
+              )
+            ],
+          );
+        }
     );
   }
 
