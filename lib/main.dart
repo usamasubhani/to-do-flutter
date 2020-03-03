@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'task.dart';
@@ -66,6 +67,27 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> deleteTask(int id) async {
+    var response = await http.delete(
+      apiUrl + '/' + id.toString()
+    );
+    this.setState((){
+      handleResponse(response);
+    });
+  }
+
+  void handleResponse(var response) {
+    this.setState((){
+      if (response.statusCode == 200) {
+        var parsedJson = json.decode(response.body);
+        tasks = TaskList.fromJson(parsedJson);
+      }
+      else {
+        throw Exception('Non 200 response');
+      }
+    });
+  }
+
 
   @override
   void initState() {
@@ -80,23 +102,63 @@ class HomePageState extends State<HomePage> {
           title: Text('Tasks'),
           backgroundColor: Colors.red,
         ),
-        body: Column(
-            children: <Widget>[
-              if (tasks != null) for (var t in tasks.tasks) Row(
-                children: <Widget>[
-                  Checkbox(value: t.status,
-                  onChanged: (bool val){
-                    setState(() {
-                      t.status = val;
-                    });
-                    updateTask(t.id, jsonEncode(t));
-                  }
+        body: ListView.builder(
+            itemCount: tasks.tasks.length,
+            itemBuilder: (context, index) {
+              var item = tasks.tasks[index];
+              return Dismissible(
+                key: UniqueKey(),
+                background: Container(
+//                  color: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Icon(
+                    Icons.delete,
+                    color: Colors.red,
                   ),
-                  Text(t.title)
-                ],
-              )
-            ]
+                ),
+                secondaryBackground: Container(
+//                  color: Colors.amber[700],
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Icon(
+                    Icons.done,
+                    color: Colors.green,
+                  ),
+                ),
+                child: Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: Material(
+                    color: Colors.white,
+                    elevation: 10.0,
+                    borderRadius: BorderRadius.circular(24.0),
+                    child: Row(
+                        children: <Widget>[
+                          Checkbox(value: item.status,
+                              onChanged: (bool val){
+                                setState(() {
+                                  item.status = val;
+                                });
+                                updateTask(item.id, jsonEncode(item));
+                              }
+                          ),
+                          Text(item.title)
+                        ],
+                      )
+                )
+                ),
+                onDismissed: (direction) {
+                  if (direction == DismissDirection.startToEnd) {
+                    deleteTask(item.id);
+                  } else {
+                    print("Complete Task (NOT IMPLEMENTED");
+                  }
+
+                },
+              );
+            }
         ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showNewTaskDialog(context).then((onValue) {
@@ -142,8 +204,13 @@ class HomePageState extends State<HomePage> {
                 onPressed: () {
                   if (newTaskTitle.text.toString().isEmpty)
                     Navigator.of(context).pop();
-                  Map task = {'title': newTaskTitle.text.toString(), 'description': newTaskDesc.text.toString()};
-                  Navigator.of(context).pop(task);
+                  else {
+                    Map task = {
+                      'title': newTaskTitle.text.toString(),
+                      'description': newTaskDesc.text.toString()
+                    };
+                    Navigator.of(context).pop(task);
+                  }
                 },
               )
             ],
