@@ -49,8 +49,6 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> addTask(Map task) async {
-//    print(task.toString());
-//    print(jsonEncode(task));
     var response = await http.post(
       apiUrl,
       headers: {"Content-type" : "application/json"},
