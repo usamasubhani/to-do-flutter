@@ -45,7 +45,7 @@ class HomePageState extends State<HomePage> {
         headers: {"Content-type" : "application/json"},
         body: json
     );
-    print(response.body);
+    handleResponse(response);
   }
 
   Future<void> addTask(Map task) async {
@@ -129,7 +129,7 @@ class HomePageState extends State<HomePage> {
                   child: Material(
                     color: Colors.white,
                     elevation: 10.0,
-                    borderRadius: BorderRadius.circular(24.0),
+                    borderRadius: BorderRadius.circular(14.0),
                     child: Row(
                         children: <Widget>[
                           Checkbox(value: item.status,
@@ -140,7 +140,25 @@ class HomePageState extends State<HomePage> {
                                 updateTask(item.id, jsonEncode(item));
                               }
                           ),
-                          Text(item.title)
+                          Text(item.title),
+                          Expanded( // Empty widget to align edit button to right
+                            flex: 2,
+                            child: Text('')
+                          ),
+                          IconButton(
+                            key: UniqueKey(),
+                            icon: Icon(Icons.edit),
+                            alignment: Alignment.centerRight,
+                            onPressed: () {
+                              showEditTaskDialog(context, item).then((onValue) {
+                                if (onValue != null) {
+                                  item.title = onValue['title'];
+                                  item.description = onValue['description'];
+                                  updateTask(item.id, jsonEncode(item));
+                                }
+                              });
+                            },
+                          )
                         ],
                       )
                 )
@@ -156,7 +174,6 @@ class HomePageState extends State<HomePage> {
               );
             }
         ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showNewTaskDialog(context).then((onValue) {
@@ -165,7 +182,7 @@ class HomePageState extends State<HomePage> {
             }
           });
         },
-        child: Icon(Icons.print),
+        child: Icon(Icons.add),
         backgroundColor: Colors.red,
       ),
     );
@@ -177,6 +194,7 @@ class HomePageState extends State<HomePage> {
     return showDialog(context: context,
         builder: (BuildContext context) {
           return AlertDialog(
+            contentPadding: EdgeInsets.all(10.0),
             content: Column(
               children: <Widget>[
                 TextField(
@@ -206,6 +224,52 @@ class HomePageState extends State<HomePage> {
                     Map task = {
                       'title': newTaskTitle.text.toString(),
                       'description': newTaskDesc.text.toString()
+                    };
+                    Navigator.of(context).pop(task);
+                  }
+                },
+              )
+            ],
+          );
+        }
+    );
+  }
+
+  Future<Map> showEditTaskDialog(BuildContext context, Task task) {
+    TextEditingController editTaskTitle = TextEditingController(text: task.title);
+    TextEditingController editTaskDesc = TextEditingController(text: task.description);
+    return showDialog(context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Column(
+              children: <Widget>[
+                TextField(
+                  controller: editTaskTitle,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Task',
+                  ),
+                ),
+                TextField(
+                  controller: editTaskDesc,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Description',
+                  ),
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Add'),
+                onPressed: () {
+                  if (editTaskTitle.text.toString().isEmpty)
+                    Navigator.of(context).pop();
+                  else {
+                    Map task = {
+                      'title': editTaskTitle.text.toString(),
+                      'description': editTaskDesc.text.toString()
                     };
                     Navigator.of(context).pop(task);
                   }
