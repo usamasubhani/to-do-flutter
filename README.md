@@ -5,5 +5,6 @@
 ## Status
 - [x] Fetch all tasks.
 - [x] Update task status.
-- [ ] Update task.
-- [ ] Delete task.
+- [x] Update task.
+- [x] Delete task.
+- [x] Create new task.
