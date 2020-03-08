@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'task.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +8,7 @@ import 'package:http/http.dart' as http;
 
 
 void main() {
+  SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
   runApp(MaterialApp(
       home: HomePage()
   ));
@@ -94,20 +96,24 @@ class HomePageState extends State<HomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)  {
     return  Scaffold(
+//      backgroundColor: Color(0xffEAECEF),
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          title: Text('Tasks'),
-          backgroundColor: Colors.red,
+          title: Text('Today', style: TextStyle(color: Color(0xff464D45))),
+//          backgroundColor: Color(0xffEAECEF),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          brightness: Brightness.light,
         ),
-        body: ListView.builder(
+        body: (tasks == null) ? Center(child: Text('Empty')) : ListView.builder(
             itemCount: tasks.tasks.length,
             itemBuilder: (context, index) {
               var item = tasks.tasks[index];
               return Dismissible(
                 key: UniqueKey(),
                 background: Container(
-//                  color: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   alignment: AlignmentDirectional.centerStart,
                   child: Icon(
@@ -124,15 +130,34 @@ class HomePageState extends State<HomePage> {
                     color: Colors.green,
                   ),
                 ),
+
                 child: Container(
                   padding: EdgeInsets.all(10.0),
-                  child: Material(
-                    color: Colors.white,
-                    elevation: 10.0,
-                    borderRadius: BorderRadius.circular(14.0),
+                  child: Container(
+
+                      decoration: new BoxDecoration(
+//                        color: Color(0xffEAECEF),
+                      color: Colors.white,
+                        boxShadow: [
+                          new BoxShadow(
+                            color: Color(0xffd9d9d9),
+//                            color: Colors.red,
+                            offset: new Offset(20.0, 20.0),
+                            blurRadius: 60.0,
+                          ),
+                          new BoxShadow(
+                            color: Color(0xffffffff),
+                            offset: new Offset(-20.0, -20.0),
+                            blurRadius: 60.0,
+                          )
+                        ],
+                        borderRadius: BorderRadius.circular(14.0),
+                      ),
                     child: Row(
                         children: <Widget>[
-                          Checkbox(value: item.status,
+                          Checkbox(
+                              activeColor: Colors.black,
+                              value: item.status,
                               onChanged: (bool val){
                                 setState(() {
                                   item.status = val;
@@ -183,8 +208,10 @@ class HomePageState extends State<HomePage> {
           });
         },
         child: Icon(Icons.add),
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.black,
+        elevation: 0,
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat
     );
   }
 
