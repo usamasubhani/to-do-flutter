@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 
 
 void main() {
-  SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
+  // SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
   runApp(MaterialApp(
       home: HomePage()
   ));
@@ -99,7 +99,7 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context)  {
     return  Scaffold(
 //      backgroundColor: Color(0xffEAECEF),
-        backgroundColor: Colors.white,
+        backgroundColor: Color.fromARGB(255, 238, 238, 238),
         appBar: AppBar(
           title: Text('Today', style: TextStyle(color: Color(0xff464D45))),
 //          backgroundColor: Color(0xffEAECEF),
@@ -107,7 +107,7 @@ class HomePageState extends State<HomePage> {
           elevation: 0,
           brightness: Brightness.light,
         ),
-        body: (tasks == null) ? Center(child: Text('Empty')) : ListView.builder(
+        body: (tasks == null) ? Center(child: Text('Nothing')) : ListView.builder(
             itemCount: tasks.tasks.length,
             itemBuilder: (context, index) {
               var item = tasks.tasks[index];
@@ -137,18 +137,18 @@ class HomePageState extends State<HomePage> {
 
                       decoration: new BoxDecoration(
 //                        color: Color(0xffEAECEF),
-                      color: Colors.white,
+                        color: Color.fromARGB(255, 238, 238, 238),
                         boxShadow: [
                           new BoxShadow(
                             color: Color(0xffd9d9d9),
 //                            color: Colors.red,
-                            offset: new Offset(20.0, 20.0),
-                            blurRadius: 60.0,
+                            offset: new Offset(10.0, 10.0),
+                            blurRadius: 10.0,
                           ),
                           new BoxShadow(
                             color: Color(0xffffffff),
-                            offset: new Offset(-20.0, -20.0),
-                            blurRadius: 60.0,
+                            offset: new Offset(-10.0, -10.0),
+                            blurRadius: 10.0,
                           )
                         ],
                         borderRadius: BorderRadius.circular(14.0),
@@ -220,44 +220,8 @@ class HomePageState extends State<HomePage> {
     TextEditingController newTaskDesc = TextEditingController();
     return showDialog(context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            contentPadding: EdgeInsets.all(10.0),
-            content: Column(
-              children: <Widget>[
-                TextField(
-                  controller: newTaskTitle,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Task',
-                  ),
-                ),
-                TextField(
-                  controller: newTaskDesc,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Description',
-                  ),
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Add'),
-                onPressed: () {
-                  if (newTaskTitle.text.toString().isEmpty)
-                    Navigator.of(context).pop();
-                  else {
-                    Map task = {
-                      'title': newTaskTitle.text.toString(),
-                      'description': newTaskDesc.text.toString()
-                    };
-                    Navigator.of(context).pop(task);
-                  }
-                },
-              )
-            ],
-          );
+          return taskInputDialog(newTaskTitle, newTaskDesc);
+          
         }
     );
   }
@@ -267,36 +231,53 @@ class HomePageState extends State<HomePage> {
     TextEditingController editTaskDesc = TextEditingController(text: task.description);
     return showDialog(context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            content: Column(
+          // return taskInputDialog(editTaskTitle, editTaskDesc);
+          return taskInputDialog(editTaskTitle, editTaskDesc);
+        }
+    );
+  }
+
+  Widget taskInputDialog(TextEditingController taskTitleController, TextEditingController taskDescController)
+  {
+    return AlertDialog(
+            content: Container(height: 200,
+            child: Column(
               children: <Widget>[
                 TextField(
-                  controller: editTaskTitle,
+                  controller: taskTitleController,
                   autofocus: true,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(),
+                    
                     labelText: 'Task',
                   ),
                 ),
                 TextField(
-                  controller: editTaskDesc,
+                  controller: taskDescController,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(),
+                    // border: OutlineInputBorder(),
                     labelText: 'Description',
                   ),
                 ),
               ],
             ),
+            ),
+            
             actions: <Widget>[
+              FlatButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
               FlatButton(
                 child: Text('Add'),
                 onPressed: () {
-                  if (editTaskTitle.text.toString().isEmpty)
+                  if (taskTitleController.text.toString().isEmpty)
                     Navigator.of(context).pop();
                   else {
                     Map task = {
-                      'title': editTaskTitle.text.toString(),
-                      'description': editTaskDesc.text.toString()
+                      'title': taskTitleController.text.toString(),
+                      'description': taskDescController.text.toString()
                     };
                     Navigator.of(context).pop(task);
                   }
@@ -304,8 +285,6 @@ class HomePageState extends State<HomePage> {
               )
             ],
           );
-        }
-    );
   }
 
 }
