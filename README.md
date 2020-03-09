@@ -8,3 +8,5 @@
 - [x] Update task.
 - [x] Delete task.
 - [x] Create new task.
+- [ ] Local Storage.
+- [ ] Splash Screen + Icon
